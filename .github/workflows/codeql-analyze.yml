@@ -24,7 +24,7 @@
 # the `language` matrix defined below to confirm you have the correct set of
 # supported CodeQL languages.
 #
-name: "CodeQL Analyze"
+name: "CodeQL"
 
 on:
   push:
@@ -56,6 +56,8 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
+      with:
+        submodules: 'recursive'
 
     - if: matrix.language == 'c-cpp'
       name: Setup environment
