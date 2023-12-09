@@ -1,5 +1,7 @@
 # CV-CUDA
 
+![Code Analysis](https://github.com/CVCUDA/CV-CUDA/actions/workflows/codeql-analyze.yml/badge.svg)
+
 [![License](https://img.shields.io/badge/License-Apache_2.0-yellogreen.svg)](https://opensource.org/licenses/Apache-2.0)
 
 ![Version](https://img.shields.io/badge/Version-v0.4.0--beta-blue)

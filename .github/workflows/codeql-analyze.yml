@@ -40,12 +40,7 @@ on:
 
 jobs:
   analyze:
-    name: Analyze
-    # Runner size impacts CodeQL analysis time. To learn more, please see:
-    #   - https://gh.io/recommended-hardware-resources-for-running-codeql
-    #   - https://gh.io/supported-runners-and-hardware-resources
-    #   - https://gh.io/using-larger-runners
-    # Consider using larger runners for possible analysis time improvements.
+    name: Analyze"
     runs-on: ${{ (matrix.language == 'swift' && 'macos-latest') || 'ubuntu-20.04' }}
     timeout-minutes: ${{ (matrix.language == 'swift' && 120) || 360 }}
     permissions:
@@ -57,13 +52,27 @@ jobs:
       fail-fast: false
       matrix:
         language: [ 'c-cpp', 'javascript-typescript', 'python' ]
-        # CodeQL supports [ 'c-cpp', 'csharp', 'go', 'java-kotlin', 'javascript-typescript', 'python', 'ruby', 'swift' ]
-        # Use only 'java-kotlin' to analyze code written in Java, Kotlin or both
-        # Use only 'javascript-typescript' to analyze code written in JavaScript, TypeScript or both
-        # Learn more about CodeQL language support at https://aka.ms/codeql-docs/language-support
 
     steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Setup environment
+      if: matrix.language == 'c-cpp'
+      run: |
+        sudo apt update -y && sudo apt install -y --no-install-recommends \
+        git git-lfs gcc-11 g++-11 ninja-build ccache libgtest-dev libgmock-dev \
+        pre-commit shellcheck curl doxygen python3 python3-pip python3-dev \
+        python3-distutils
+    
+    - name: Install Python Dependencies
+      if: matrix.language == 'c-cpp'
+      run: |
+        python3 -m pip install sphinx-rtd-theme sphinx==4.5.0 breathe exhale \
+        recommonmark graphviz numpy==1.24.1
+
     - name: Install CUDA Toolkit
+      if: matrix.language == 'c-cpp'
       uses: Jimver/cuda-toolkit@v0.2.11
       id: cuda-toolkit
       with:
@@ -71,7 +80,31 @@ jobs:
         linux-local-args: '["--toolkit"]'
 
     - name: Verify CUDA installation
+      if: matrix.language == 'c-cpp'
       run: |
           echo "Installed CUDA version is: ${{ steps.cuda-toolkit.outputs.cuda }}"
           echo "CUDA install location: ${{ steps.cuda-toolkit.outputs.CUDA_PATH }}"
           nvcc -V
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v2
+      with:
+        languages: ${{ matrix.language }}
+        # If you wish to specify custom queries, you can do so here or in a config file.
+        # By default, queries listed here will override any specified in a config file.
+        # Prefix the list here with "+" to use these queries and those in the config file.
+
+        # For more details on CodeQL's query packs, refer to: https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#using-queries-in-ql-packs
+        # queries: security-extended,security-and-quality
+
+    - name: Build CMake project
+      if: matrix.language == 'c-cpp'
+      run: |
+        echo "Running CMake project build script"
+        ./ci/build.sh $build_type $build_dir "-DBUILD_SAMPLES=OFF \
+        -DBUILD_TESTS=OFF -DBUILD_PYTHON=1" $*
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v2
+      with:
+        category: "/language:${{matrix.language}}"
