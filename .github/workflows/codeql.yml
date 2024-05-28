@@ -86,25 +86,25 @@ jobs:
       with:
         category: "/language:${{matrix.language}}"
 
-    - if: github.ref == 'refs/heads/main'
+    - if: github.ref == 'refs/heads/dev/milesp/doc-site-from-branch'
       name: Check for Changes in main
       id: check_main_changed
       run: |
-        git fetch origin main
-        if [[ $(git rev-list -n 1 HEAD) == $(git rev-list -n 1 origin/main) ]]; then
+        git fetch origin dev/milesp/doc-site-from-branch
+        if [[ $(git rev-list -n 1 HEAD) == $(git rev-list -n 1 origin/dev/milesp/doc-site-from-branch) ]]; then
           echo "No changes in main"
           echo "deploy_docs_site=false" >> $GITHUB_ENV
         else
           echo "Changes detected in main"
           echo "deploy_docs_site=true" >> $GITHUB_ENV
-    - if: github.ref == 'refs/heads/main'
+    - if: github.ref == 'refs/heads/dev/milesp/doc-site-from-branch'
       name: Export Main Changed Status
       run: |
         echo "Main changed status: $deploy_docs_site"
       env:
         deploy_docs_site: ${{ steps.check_main_changed.outputs.deploy_docs_site }}
 
-    - if: github.ref == 'refs/heads/main' && matrix.language == 'c-cpp' && env.deploy_docs_site == 'true'
+    - if: github.ref == 'refs/heads/dev/milesp/doc-site-from-branch' && matrix.language == 'c-cpp' && env.deploy_docs_site == 'true'
       name: Clean up Sphinx Build Directory
       run: |
         find build/docs/sphinx -name '*.doctree' -delete
@@ -113,11 +113,11 @@ jobs:
         find build/docs/sphinx -name '*.inv' -delete
         find build/docs/sphinx -name '*.gz' -delete
 
-    - if: github.ref == 'refs/heads/main' && matrix.language == 'c-cpp' && env.deploy_docs_site == 'true'
+    - if: github.ref == 'refs/heads/dev/milesp/doc-site-from-branch' && matrix.language == 'c-cpp' && env.deploy_docs_site == 'true'
       name: Create .nojekyll file
       run: touch build/docs/sphinx/.nojekyll
 
-    - if: github.ref == 'refs/heads/main' && matrix.language == 'c-cpp' && env.deploy_docs_site == 'true'
+    - if: github.ref == 'refs/heads/dev/milesp/doc-site-from-branch' && matrix.language == 'c-cpp' && env.deploy_docs_site == 'true'
       name: Deploy to GitHub Pages
       uses: JamesIves/github-pages-deploy-action@v4
       with:
