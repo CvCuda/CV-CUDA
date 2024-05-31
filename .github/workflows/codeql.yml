@@ -2,7 +2,7 @@ name: "CodeQL"
 
 on:
   push:
-    branches: [ "main", "release_v*", "dev/milesp/doc-site-from-branch" ]
+    branches: [ "main", "release_v*" ]
   pull_request:
     branches: [ "main", "release_v*" ]
   schedule:
