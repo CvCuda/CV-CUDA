@@ -14,8 +14,8 @@ jobs:
     runs-on: ubuntu-22.04-64core
     timeout-minutes: 360
     permissions:
-      actions: read
-      contents: read
+      actions: write
+      contents: write
       security-events: write
 
     strategy:
